@@ -6,70 +6,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f4f7f6; font-family: sans-serif; }
-        .card-resumo { background: white; border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-left: 5px solid #2E4057; }
-        .cat-adulto { border-left: 4px solid #2E4057; background: #f8f9fa; }
-        .cat-jovem { border-left: 4px solid #1B6CA8; background: #f0f7ff; }
-        .cat-infantil { border-left: 4px solid #0E7C4C; background: #f1faf5; }
-        .cat-apoio { border-left: 4px solid #7B3F00; background: #fffaf0; }
-        .badge-qtd { font-size: 0.9em; padding: 5px 10px; border-radius: 20px; }
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card-familia { background: white; border-radius: 15px; padding: 20px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-top: 6px solid #1B6CA8; }
+        .card-resumo { background: white; border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .nome-pessoa { font-weight: 600; color: #333; }
+        .revista-badge { background-color: #e9ecef; color: #495057; font-size: 0.85em; padding: 4px 10px; border-radius: 12px; margin-right: 5px; display: inline-block; margin-top: 4px; }
+        .sessao-titulo { color: #1B6CA8; border-bottom: 2px solid #1B6CA8; padding-bottom: 10px; margin: 40px 0 20px 0; }
     </style>
 </head>
 <body class="container py-4">
-    <h2 class="text-center mb-4">📋 Pedidos EBD - 1º Trimestre 2026</h2>
+    <h2 class="text-center mb-4">📋 Controle de Pedidos EBD</h2>
 
     <div class="row g-3 mb-4 text-center">
-        <div class="col-6 col-md-3"><div class="card-resumo"><strong>Total Revistas</strong><br><span class="fs-4">{{ resumo.qtd }}</span></div></div>
-        <div class="col-6 col-md-3"><div class="card-resumo text-danger"><strong>A Receber</strong><br><span class="fs-4">R$ {{ "%.2f"|format(resumo.valor) }}</span></div></div>
+        <div class="col-6 col-md-3"><div class="card-resumo"><strong>Qtd Revistas</strong><br><span class="fs-4">{{ resumo.qtd }}</span></div></div>
+        <div class="col-6 col-md-3"><div class="card-resumo text-danger"><strong>Total Geral</strong><br><span class="fs-4">R$ {{ "%.2f"|format(resumo.valor) }}</span></div></div>
         <div class="col-6 col-md-3"><div class="card-resumo text-success"><strong>Já Pago</strong><br><span class="fs-4">R$ {{ "%.2f"|format(resumo.vpago) }}</span></div></div>
         <div class="col-6 col-md-3"><div class="card-resumo"><strong>Pessoas</strong><br><span class="fs-4">{{ resumo.pediu }}</span></div></div>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-hover align-middle bg-white rounded shadow-sm">
-            <thead class="table-dark">
-                <tr>
-                    <th>Nome / Revistas Pedidas</th>
-                    <th style="width: 180px;">Status</th>
-                    <th style="width: 120px;">Valor Pago</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for nome in pessoas %}
-                {% set p = pessoas_data[nome] %}
-                <tr class="{% if 'Adulto' in p.revistas or 'Mestre' in p.revistas %}cat-adulto{% elif 'Infantil' in p.revistas %}cat-infantil{% else %}cat-apoio{% endif %}">
-                    <td>
-                        <strong>{{ nome }}</strong><br>
-                        <small class="text-muted">
-                            {% for tid, label, preco in tipos %}
-                                {% if p[tid] > 0 %}
-                                    <span class="badge bg-secondary badge-qtd">{{ p[tid] }}x {{ label }}</span>
-                                {% endif %}
-                            {% endfor %}
-                        </small>
-                    </td>
-                    <td>
-                        <select class="form-select form-select-sm mb-1" onchange="salvar('{{ nome }}', 'status', this.value)">
-                            <option value="" {% if p.status == "" %}selected{% endif %}>Selecione...</option>
-                            <option value="PENDENTE" {% if p.status == "PENDENTE" %}selected{% endif %}>🔴 PENDENTE</option>
-                            <option value="PAGO" {% if p.status == "PAGO" %}selected{% endif %}>🟢 PAGO</option>
-                            <option value="PARCIAL" {% if p.status == "PARCIAL" %}selected{% endif %}>🟡 PAGO METADE</option>
-                        </select>
-                        <select class="form-select form-select-sm" onchange="salvar('{{ nome }}', 'forma', this.value)">
-                            <option value="" {% if p.forma == "" %}selected{% endif %}>Forma...</option>
-                            <option value="PIX" {% if p.forma == "PIX" %}selected{% endif %}>PIX</option>
-                            <option value="DINHEIRO" {% if p.forma == "DINHEIRO" %}selected{% endif %}>DINHEIRO</option>
-                        </select>
-                    </td>
-                    <td>
-                        <input type="number" class="form-control form-control-sm" value="{{ p.valor_pago }}" 
-                               onblur="salvar('{{ nome }}', 'valor_pago', this.value)" placeholder="R$">
-                        <small class="text-muted">Total: R$ {{ "%.2f"|format(p.valor_total) }}</small>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <h3 class="sessao-titulo">👨‍👩‍👧‍👦 Famílias</h3>
+    {% for fam in familias %}
+    <div class="card-familia">
+        <h5 class="text-primary mb-3">{{ fam.nome }}</h5>
+        {% for nome in fam.membros %}
+            {% set p = pessoas_data[nome] %}
+            <div class="row align-items-center mb-3 border-bottom pb-2">
+                <div class="col-md-5">
+                    <span class="nome-pessoa">{{ nome }}</span><br>
+                    {% for tid, label, preco in tipos %}
+                        {% if p[tid] > 0 %}<span class="revista-badge">{{ p[tid] }}x {{ label }}</span>{% endif %}
+                    {% endfor %}
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select form-select-sm mb-1" onchange="salvar('{{ nome }}', 'status', this.value)">
+                        <option value="" {% if p.status == "" %}selected{% endif %}>Status...</option>
+                        <option value="PAGO" {% if p.status == "PAGO" %}selected{% endif %}>🟢 PAGO</option>
+                        <option value="PENDENTE" {% if p.status == "PENDENTE" %}selected{% endif %}>🔴 PENDENTE</option>
+                        <option value="PARCIAL" {% if p.status == "PARCIAL" %}selected{% endif %}>🟡 PAGO METADE</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input type="number" class="form-control form-control-sm" value="{{ p.valor_pago }}" onblur="salvar('{{ nome }}', 'valor_pago', this.value)" placeholder="R$">
+                    <small class="text-muted">Devido: R$ {{ "%.2f"|format(p.valor_total) }}</small>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+
+    <h3 class="sessao-titulo">👤 Pessoas Individuais</h3>
+    <div class="card-familia">
+        {% for nome in soltos %}
+            {% set p = pessoas_data[nome] %}
+            <div class="row align-items-center mb-3 border-bottom pb-2">
+                <div class="col-md-5">
+                    <span class="nome-pessoa">{{ nome }}</span><br>
+                    {% for tid, label, preco in tipos %}
+                        {% if p[tid] > 0 %}<span class="revista-badge">{{ p[tid] }}x {{ label }}</span>{% endif %}
+                    {% endfor %}
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select form-select-sm mb-1" onchange="salvar('{{ nome }}', 'status', this.value)">
+                        <option value="" {% if p.status == "" %}selected{% endif %}>Status...</option>
+                        <option value="PAGO" {% if p.status == "PAGO" %}selected{% endif %}>🟢 PAGO</option>
+                        <option value="PENDENTE" {% if p.status == "PENDENTE" %}selected{% endif %}>🔴 PENDENTE</option>
+                        <option value="PARCIAL" {% if p.status == "PARCIAL" %}selected{% endif %}>🟡 PAGO METADE</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input type="number" class="form-control form-control-sm" value="{{ p.valor_pago }}" onblur="salvar('{{ nome }}', 'valor_pago', this.value)" placeholder="R$">
+                    <small class="text-muted">Total: R$ {{ "%.2f"|format(p.valor_total) }}</small>
+                </div>
+            </div>
+        {% endfor %}
     </div>
 
     <script>
@@ -77,9 +86,4 @@
             fetch('/salvar', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({nome: nome, campo: campo, valor: valor})
-            }).then(() => { window.location.reload(); }); // Atualiza para recalcular o resumo no topo
-        }
-    </script>
-</body>
-</html>
+                body:
